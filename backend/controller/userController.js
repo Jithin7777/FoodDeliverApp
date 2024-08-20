@@ -80,7 +80,7 @@ exports.googleLogin = async (req, res) => {
     if (existingUser) {
       req.session.user = {
         _id: existingUser._id,
-        userName: existingUser.username,
+        username: existingUser.username,
         email: existingUser.email,
         profilePic: existingUser.profilePic,
       };

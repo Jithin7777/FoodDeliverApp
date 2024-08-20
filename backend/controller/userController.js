@@ -95,7 +95,7 @@ exports.googleLogin = async (req, res) => {
 
       req.session.user = {
         _id: newUser._id,
-        userName: newUser.username,
+        username: newUser.username,
         email: newUser.email,
         profilePic: newUser.profilePic,
       };
@@ -106,6 +106,9 @@ exports.googleLogin = async (req, res) => {
     res.status(500).json("Internal Server Error");
   }
 };
+
+
+
 
 
 exports.dummyAPI = async (req, res) => {

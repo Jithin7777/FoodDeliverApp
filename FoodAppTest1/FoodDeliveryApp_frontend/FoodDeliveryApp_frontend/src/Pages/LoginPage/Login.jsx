@@ -31,9 +31,6 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-  let newUrl=url
- 
-
     const { email, password } = userlogin;
     if (!email || !password) {
       toast.error("Please fill all fields", { position: "top-right" });
@@ -42,9 +39,9 @@ const Login = () => {
 
     try {
       const result = await loginApi(userlogin);
-      if(result.status == 200){
+      if (result.status == 200) {
         setToken(result.data.token)
-        localStorage.setItem("token",result.data.token)
+        localStorage.setItem("token", result.data.token)
       }
       console.log("API response:", result);
 
@@ -54,11 +51,11 @@ const Login = () => {
         const token = result.data.token;
         const username = result.data.user.username || "User";
 
-        toast.success(`${username}, you have logged in successfully`,{ position: 'top-center' });
+        toast.success(`${username}, you have logged in successfully, { position: 'top-center' }`);
         setUserlogin({ email: "", password: "" });
         navigate("/admin/add");
       } else {
-        toast.error(result.response.data,{ position: 'top-right' });
+        toast.error(result.response.data, { position: 'top-right' });
       }
     } catch (error) {
       console.error("Error during login:", error);
@@ -69,32 +66,49 @@ const Login = () => {
   const handleGoogleLogin = async (response) => {
     if (response.error) {
       console.error("Google Login Error:", response.error);
-      alert("An error occurred during Google Login. Please try again.");
+      toast.error("An error occurred during Google Login. Please try again.", { position: 'top-right' });
       return;
     }
-
+  
     try {
-      const googleToken = response.code; // Assuming response from Google contains a 'code'
-      const result = await googleLoginApi(googleToken); // Send the token to your backend API
-
-      console.log("Google Login API response:", result);
-
-      if (result.status === 200) { // Handle successful Google login response
+      // Fetch user information using Google token
+      const googleToken = response.credential;
+      const userInfo = await fetchGoogleUserInfo(googleToken);
+  
+      const { email, username, profilePic } = userInfo;
+  
+      // Send the user information to the backend API
+      const result = await googleLoginApi({ email, username, profilePic });
+  
+      if (result.status === 200) {
         sessionStorage.setItem("Existinguser", JSON.stringify(result.data.user));
         sessionStorage.setItem("token", result.data.token);
         const username = result.data.user.username || "User";
-
-        toast.success(`${username}, you have logged in successfully with Google`,{ position: 'top-center' });
-        navigate("/home"); // Redirect to home page after successful login
+        toast.success(`${username}, you have logged in successfully with Google`, { position: 'top-center' });
+        navigate("/home");
       } else {
-        alert(result.response.data); // Handle potential errors from backend
+        toast.error(result.response.data, { position: 'top-right' });
       }
     } catch (error) {
       console.error("Error during Google Login backend:", error);
-     toast.error("An error occurred during Google Login. Please try again.",{ position: 'top-right' });
+      toast.error("An error occurred during Google Login. Please try again.", { position: 'top-right' });
     }
   };
+  
+  const fetchGoogleUserInfo = async (token) => {
+    const response = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${token}`);    const userInfo = await response.json();
+    console.log(userInfo);
 
+    return {
+      email: userInfo.email,
+      username: userInfo.name,
+      profilePic: userInfo.picture,
+    };
+    
+  };
+  
+
+  
 
   const handleModalClose = () => setShowModal(false);
   const handleModalShow = () => setShowModal(true);
@@ -103,27 +117,18 @@ const Login = () => {
     <div>
 
       <div className='logo-container'>
-      <h2>
-              <div className="d-flex justify-content-center  gap-1">
+        {/* <img src={assets.logo} className='logo' alt="" /> */}
+        <h2 className='mt-3'>
+              <div className="d-flex justify-content-center gap-1">
                 <i
                   class="fa-solid fa-burger fa-xs fs-1 mt-3"
                   style={{ color: "#FE0C00" }}
                 ></i>
                 <div>
-                  <span style={{ color: "#FE0C00" }}>
-                    {" "}
-                    <b>B</b>ite
-                  </span>
-                  <span
-                    className="text-gray-700 "
-                    style={{ fontWeight: "500" }}
-                  >
-                    Box
-                  </span>
+                <span style={{ color: "#FE0C00" }}> <b>B</b>ite</span><span className="text-gray-700 " style={{fontWeight:'500'}}>Box</span>
                 </div>
               </div>
-            </h2>{" "}
-
+            </h2>
       </div>
       <div className='maindiv'>
         <Container className='maincontainer'>
